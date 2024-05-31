@@ -16,10 +16,10 @@ int main(int argc, char **argv) {
     
     int sock = 0;
     struct sockaddr_in serv_addr;
-    char buffer[2048] = {0}; // Aumentamos el tamaño del buffer para el tablero
+    char buffer[2048] = {0};
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        cout << "Error de creación de socket" << endl;
+        perror("Error de creación de socket");
         return -1;
     }
 
@@ -27,12 +27,12 @@ int main(int argc, char **argv) {
     serv_addr.sin_port = htons(port);
 
     if (inet_pton(AF_INET, server_ip, &serv_addr.sin_addr) <= 0) {
-        cout << "Dirección inválida / Dirección no soportada" << endl;
+        perror("Dirección inválida / Dirección no soportada");
         return -1;
     }
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        cout << "Conexión fallida" << endl;
+        perror("Conexión fallida");
         return -1;
     }
 
@@ -56,9 +56,15 @@ int main(int argc, char **argv) {
             cout << "Conexión cerrada por el servidor." << endl;
             break;
         } else {
-            cout << "Error de lectura del socket." << endl;
+            perror("Error de lectura del socket");
             break;
         }
+    }
+
+    memset(buffer, 0, sizeof(buffer));
+    int n = read(sock, buffer, 2048);
+    if (n > 0) {
+        cout << buffer;
     }
 
     close(sock);

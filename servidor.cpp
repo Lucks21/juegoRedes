@@ -1,6 +1,6 @@
-#include <sys/socket.h> // socket()
-#include <arpa/inet.h>  // hton*()
-#include <string.h>     // memset()
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
 #include <unistd.h>
 #include <iostream>
 #include <vector>
@@ -14,8 +14,8 @@ using namespace std;
 
 const int FILAS = 6;
 const int COLUMNAS = 7;
-int contadorJugadores = 0; // Contador global de jugadores
-mutex contadorMutex; // Mutex para proteger el acceso al contador
+int contadorJugadores = 0;
+mutex contadorMutex;
 
 void inicializarTablero(vector<vector<char>>& tablero) {
     for (int i = 0; i < FILAS; ++i) {
@@ -118,7 +118,7 @@ void jugar(int socket_cliente, struct sockaddr_in direccionCliente, int numeroJu
     char fichaCliente = 'C';
     char jugadorActual = rand() % 2 == 0 ? fichaServidor : fichaCliente;
 
-    this_thread::sleep_for(chrono::seconds(2)); // Esperar 2 segundos
+    this_thread::sleep_for(chrono::seconds(2));
 
     if (jugadorActual == fichaServidor) {
         send(socket_cliente, "El servidor empieza el juego.\n", 30, 0);
@@ -137,16 +137,18 @@ void jugar(int socket_cliente, struct sockaddr_in direccionCliente, int numeroJu
             int columna = atoi(buffer) - 1;
 
             if (!hacerMovimiento(tablero, columna, fichaCliente)) {
-                send(socket_cliente, "Movimiento inválido. Intenta de nuevo.\n", 39, 0); // Añadir el salto de línea
+                send(socket_cliente, "Movimiento inválido. Intenta de nuevo.\n", 39, 0);
                 continue;
             }
             victoria = verificarVictoria(tablero, fichaCliente);
 
             if (victoria) {
+                imprimirTablero(tablero, socket_cliente);
                 send(socket_cliente, "¡Has ganado!\n", 13, 0);
                 cout << "[jugador " << numeroJugador << ", ip: " << ip << ":" << ntohs(direccionCliente.sin_port) << "] ha ganado." << endl;
                 break;
             } else if (tableroLleno(tablero)) {
+                imprimirTablero(tablero, socket_cliente);
                 send(socket_cliente, "Empate! El tablero está lleno.\n", 30, 0);
                 cout << "[jugador " << numeroJugador << ", ip: " << ip << ":" << ntohs(direccionCliente.sin_port) << "] empate." << endl;
                 break;
@@ -161,10 +163,12 @@ void jugar(int socket_cliente, struct sockaddr_in direccionCliente, int numeroJu
             victoria = verificarVictoria(tablero, fichaServidor);
 
             if (victoria) {
+                imprimirTablero(tablero, socket_cliente);
                 send(socket_cliente, "¡El servidor ha ganado!\n", 24, 0);
                 cout << "[jugador " << numeroJugador << ", ip: " << ip << ":" << ntohs(direccionCliente.sin_port) << "] ha perdido." << endl;
                 break;
             } else if (tableroLleno(tablero)) {
+                imprimirTablero(tablero, socket_cliente);
                 send(socket_cliente, "Empate! El tablero está lleno.\n", 30, 0);
                 cout << "[jugador " << numeroJugador << ", ip: " << ip << ":" << ntohs(direccionCliente.sin_port) << "] empate." << endl;
                 break;
@@ -191,7 +195,7 @@ int main(int argc, char **argv) {
 
     cout << "Creando socket de escucha...\n";
     if ((socket_server = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        cout << "Error al crear el socket de escucha\n";
+        perror("Error al crear el socket de escucha");
         exit(EXIT_FAILURE);
     }
 
@@ -203,13 +207,13 @@ int main(int argc, char **argv) {
 
     cout << "Enlazando el socket...\n";
     if (bind(socket_server, (struct sockaddr *)&direccionServidor, sizeof(direccionServidor)) < 0) {
-        cout << "Error al llamar a bind()\n";
+        perror("Error al llamar a bind()");
         exit(EXIT_FAILURE);
     }
 
     cout << "Llamando a listen...\n";
     if (listen(socket_server, 1024) < 0) {
-        cout << "Error al llamar a listen()\n";
+        perror("Error al llamar a listen()");
         exit(EXIT_FAILURE);
     }
 
@@ -220,18 +224,16 @@ int main(int argc, char **argv) {
         int socket_cliente;
 
         if ((socket_cliente = accept(socket_server, (struct sockaddr *)&direccionCliente, &addr_size)) < 0) {
-            cout << "Error al llamar a accept()\n";
+            perror("Error al llamar a accept()");
             exit(EXIT_FAILURE);
         }
 
-        // Incrementar el contador de jugadores de manera segura
         int numeroJugador;
         {
             lock_guard<mutex> lock(contadorMutex);
             numeroJugador = ++contadorJugadores;
         }
 
-        // Crear un hilo para manejar la conexión del cliente
         thread cliente_thread(jugar, socket_cliente, direccionCliente, numeroJugador);
         cliente_thread.detach();
     }
