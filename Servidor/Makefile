@@ -3,7 +3,7 @@ CXX = g++
 
 # Compilación de servidor
 servidor: servidor.cpp
-	$(CXX) -o servidor servidor.cpp -pthread
+	g++ -o servidor servidor.cpp -pthread
 
 # Limpiar ejecutables
 clean:

@@ -3,7 +3,7 @@ CXX = g++
 
 # Compilación de cliente
 cliente: cliente.cpp
-	$(CXX) -o cliente cliente.cpp
+	g++ -o cliente cliente.cpp
 
 # Limpiar ejecutables
 clean:
