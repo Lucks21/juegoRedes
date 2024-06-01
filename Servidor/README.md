@@ -9,7 +9,4 @@ Este servidor es parte de un proyecto que implementa un juego de Cuatro en Linea
 
 ## Compilación
 
-Para compilar el servidor, utiliza el Makefile incluido en el proyecto. Abre una terminal y navega al directorio donde se encuentran los archivos, luego ejecuta:
-
-```bash
-make servidor
+Para compilar el servidor, utiliza el Makefile incluido en el proyecto.

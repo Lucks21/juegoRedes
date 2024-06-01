@@ -9,8 +9,5 @@ Este cliente es parte de un proyecto que implementa un juego de Cuatro en Linea 
 
 ## Compilación
 
-Para compilar el cliente, utiliza el Makefile incluido en el proyecto. Abre una terminal y navega al directorio donde se encuentran los archivos, luego ejecuta:
-
-```bash
-make cliente
+Para compilar el cliente, utiliza el Makefile incluido en el proyecto.
      
