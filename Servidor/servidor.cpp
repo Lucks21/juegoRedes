@@ -12,11 +12,13 @@
 
 using namespace std;
 
+// Constantes del juego
 const int FILAS = 6;
 const int COLUMNAS = 7;
-int contadorJugadores = 0;
-mutex contadorMutex;
+int contadorJugadores = 0;  // Contador de jugadores
+mutex contadorMutex;        // Mutex para proteger el contador de jugadores
 
+// Inicializa el tablero de juego con espacios vacíos
 void inicializarTablero(vector<vector<char>>& tablero) {
     for (int i = 0; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS; ++j) {
@@ -25,6 +27,7 @@ void inicializarTablero(vector<vector<char>>& tablero) {
     }
 }
 
+// Envía el tablero actual al cliente
 void imprimirTablero(const vector<vector<char>>& tablero, int socket_cliente) {
     string tablero_str;
     for (int i = 0; i < FILAS; ++i) {
@@ -45,6 +48,7 @@ void imprimirTablero(const vector<vector<char>>& tablero, int socket_cliente) {
     send(socket_cliente, tablero_str.c_str(), tablero_str.size(), 0);
 }
 
+// Realiza un movimiento en el tablero para el jugador especificado
 bool hacerMovimiento(vector<vector<char>>& tablero, int columna, char jugador) {
     if (columna < 0 || columna >= COLUMNAS || tablero[0][columna] != ' ') {
         return false;
@@ -58,7 +62,9 @@ bool hacerMovimiento(vector<vector<char>>& tablero, int columna, char jugador) {
     return false;
 }
 
+// Verifica si el jugador especificado ha ganado
 bool verificarVictoria(const vector<vector<char>>& tablero, char jugador) {
+    // Verificar filas
     for (int i = 0; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS - 3; ++j) {
             if (tablero[i][j] == jugador && tablero[i][j + 1] == jugador && tablero[i][j + 2] == jugador && tablero[i][j + 3] == jugador) {
@@ -66,6 +72,7 @@ bool verificarVictoria(const vector<vector<char>>& tablero, char jugador) {
             }
         }
     }
+    // Verificar columnas
     for (int i = 0; i < FILAS - 3; ++i) {
         for (int j = 0; j < COLUMNAS; ++j) {
             if (tablero[i][j] == jugador && tablero[i + 1][j] == jugador && tablero[i + 2][j] == jugador && tablero[i + 3][j] == jugador) {
@@ -73,6 +80,7 @@ bool verificarVictoria(const vector<vector<char>>& tablero, char jugador) {
             }
         }
     }
+    // Verificar diagonales
     for (int i = 3; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS - 3; ++j) {
             if (tablero[i][j] == jugador && tablero[i - 1][j + 1] == jugador && tablero[i - 2][j + 2] == jugador && tablero[i - 3][j + 3] == jugador) {
@@ -90,6 +98,7 @@ bool verificarVictoria(const vector<vector<char>>& tablero, char jugador) {
     return false;
 }
 
+// Verifica si el tablero está lleno
 bool tableroLleno(const vector<vector<char>>& tablero) {
     for (int j = 0; j < COLUMNAS; ++j) {
         if (tablero[0][j] == ' ') {
@@ -99,6 +108,7 @@ bool tableroLleno(const vector<vector<char>>& tablero) {
     return true;
 }
 
+// Función principal de juego para cada cliente
 void jugar(int socket_cliente, struct sockaddr_in direccionCliente, int numeroJugador) {
     char buffer[1024];
     memset(buffer, '\0', sizeof(char) * 1024);
@@ -187,9 +197,9 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    srand(time(0));
+    srand(time(0));  // Inicializar la semilla para rand()
 
-    int port = atoi(argv[1]);
+    int port = atoi(argv[1]);  // Obtener el puerto de los argumentos de la línea de comandos
     int socket_server = 0;
     struct sockaddr_in direccionServidor, direccionCliente;
 
